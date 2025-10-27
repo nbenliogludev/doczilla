@@ -2,8 +2,13 @@ package com.nbenliogludev;
 
 import com.nbenliogludev.config.AppConfig;
 import com.nbenliogludev.db.Db;
+import com.nbenliogludev.files.FileStorage;
+import com.nbenliogludev.files.LocalFileStorage;
+import com.nbenliogludev.repository.FileRepository;
 import com.nbenliogludev.repository.UserRepository;
+import com.nbenliogludev.security.TokenMiddleware;
 import com.nbenliogludev.service.AuthService;
+import com.nbenliogludev.service.FileService;
 import com.nbenliogludev.routes.Routes;
 import io.javalin.Javalin;
 import org.flywaydb.core.Flyway;
@@ -16,15 +21,15 @@ public class Main {
         AppConfig cfg = AppConfig.load();
 
         Db db = Db.init(cfg);
-        Flyway.configure()
-                .dataSource(db.getDs())
-                .locations("classpath:db/migration")
-                .load()
-                .migrate();
+        Flyway.configure().dataSource(db.getDs()).locations("classpath:db/migration").load().migrate();
 
-        UserRepository users = new UserRepository(db);
-        AuthService auth = new AuthService(users);
+        var users = new UserRepository(db);
+        var auth  = new AuthService(users);
         auth.bootstrapIfEmpty(cfg.authBootstrapUser(), cfg.authBootstrapPass());
+
+        FileRepository fileRepo = new FileRepository(db);
+        FileStorage fileStorage = new LocalFileStorage(cfg.uploadDir());
+        FileService fileService = new FileService(fileRepo, fileStorage);
 
         Javalin app = Javalin.create(conf -> {
             conf.http.defaultContentType = "application/json";
@@ -32,8 +37,9 @@ public class Main {
             conf.staticFiles.add("/public");
         });
 
-        Routes.wire(app, cfg, auth);
+        TokenMiddleware.protectApiWithBearer(app, auth);
 
+        Routes.wire(app, cfg, auth, db, fileService);
         app.start(cfg.port());
     }
 }
