@@ -22,7 +22,6 @@ public class Routes {
     public static void wire(Javalin app, AppConfig cfg, AuthService auth, Db db, FileService files) {
         app.get("/health", ctx -> ctx.result("OK"));
 
-        // Register/Login you already had:
         app.post("/api/register", ctx -> {
             var json = ctx.bodyAsClass(Map.class);
             var u = (String) json.get("username");
