@@ -4,6 +4,7 @@ import com.nbenliogludev.db.Db;
 import com.nbenliogludev.model.FileRecord;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -12,7 +13,6 @@ import java.util.UUID;
  */
 public class FileRepository {
     private final Db db;
-
     public FileRepository(Db db) { this.db = db; }
 
     public void insert(FileRecord rec) {
@@ -70,6 +70,30 @@ public class FileRepository {
                 h.createUpdate("delete from files where id = :id")
                         .bind("id", id)
                         .execute()
+        );
+    }
+
+    public List<FileRecord> findExpired(LocalDateTime cutoff) {
+        return db.jdbi().withHandle(h ->
+                h.createQuery("""
+                select id, original_name, content_type, size_bytes, storage_path, download_token,
+                       created_at, last_download_at, download_count
+                  from files
+                 where coalesce(last_download_at, created_at) < :cutoff
+            """)
+                        .bind("cutoff", cutoff)
+                        .map((rs, c) -> new FileRecord(
+                                UUID.fromString(rs.getString("id")),
+                                rs.getString("original_name"),
+                                rs.getString("content_type"),
+                                rs.getLong("size_bytes"),
+                                rs.getString("storage_path"),
+                                rs.getString("download_token"),
+                                rs.getObject("created_at", LocalDateTime.class),
+                                rs.getObject("last_download_at", LocalDateTime.class),
+                                rs.getLong("download_count")
+                        ))
+                        .list()
         );
     }
 }

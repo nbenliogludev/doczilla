@@ -43,4 +43,16 @@ public class FileService {
         repo.deleteById(r.id());
         return ok;
     }
+
+    public int cleanupExpired(int retentionDays) {
+        var cutoff = LocalDateTime.now().minusDays(retentionDays);
+        var expired = repo.findExpired(cutoff);
+        int removed = 0;
+        for (var r : expired) {
+            try { storage.delete(r.storagePath()); } catch (Exception ignore) { /* best-effort */ }
+            repo.deleteById(r.id());
+            removed++;
+        }
+        return removed;
+    }
 }

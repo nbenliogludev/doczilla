@@ -10,6 +10,7 @@ import com.nbenliogludev.security.TokenMiddleware;
 import com.nbenliogludev.service.AuthService;
 import com.nbenliogludev.service.FileService;
 import com.nbenliogludev.routes.Routes;
+import com.nbenliogludev.tasks.CleanupJob;
 import io.javalin.Javalin;
 import org.flywaydb.core.Flyway;
 
@@ -40,6 +41,9 @@ public class Main {
         TokenMiddleware.protectApiWithBearer(app, auth);
 
         Routes.wire(app, cfg, auth, db, fileService);
+
+        CleanupJob.start(fileService, cfg.retentionDays());
+
         app.start(cfg.port());
     }
 }
