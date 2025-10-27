@@ -1,0 +1,16 @@
+services:
+  app:
+    build: .
+    container_name: doczilla-app
+    environment:
+      PORT: "8080"
+      ADMIN_USER: "admin"
+      ADMIN_PASS: "admin"
+    ports:
+      - "8081:8080"
+    volumes:
+      - uploads:/app/data/uploads
+    restart: unless-stopped
+
+volumes:
+  uploads:
