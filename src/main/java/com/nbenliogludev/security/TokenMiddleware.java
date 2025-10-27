@@ -3,6 +3,9 @@ package com.nbenliogludev.security;
 import com.nbenliogludev.model.User;
 import com.nbenliogludev.service.AuthService;
 import io.javalin.Javalin;
+import io.javalin.http.HandlerType;
+
+import java.util.Optional;
 
 /**
  * @author nbenliogludev
@@ -10,21 +13,32 @@ import io.javalin.Javalin;
 public class TokenMiddleware {
     public static final String ATTR_USER = "auth.user";
 
-    public static void protectApiWithBearer(Javalin app, AuthService authService) {
-        app.before("/api/*", ctx -> {
-            var tokenOpt = BearerTokenUtil.parseBearer(ctx.header("Authorization"));
-            if (tokenOpt.isEmpty()) {
-                ctx.header("WWW-Authenticate", "Bearer");
+    public static void protectApiWithBearer(Javalin app, AuthService auth) {
+        app.before(ctx -> {
+            final String path = ctx.path();
+            if (!path.startsWith("/api/")) return;
+
+            // allowlist auth endpoints
+            if (path.equals("/api/login") || path.equals("/api/register")) return;
+
+            // allow CORS preflight etc.
+            if (ctx.method() == HandlerType.OPTIONS) return;
+
+            String authz = ctx.header("Authorization");
+            if (authz == null || !authz.startsWith("Bearer ")) {
                 ctx.status(401).result("Unauthorized");
                 return;
             }
-            var userOpt = authService.authenticateToken(tokenOpt.get());
-            if (userOpt.isEmpty()) {
-                ctx.header("WWW-Authenticate", "Bearer error=\"invalid_token\"");
+
+            String token = authz.substring(7);
+            Optional<User> u = auth.authenticateToken(token);
+            if (u.isEmpty()) {
                 ctx.status(401).result("Unauthorized");
                 return;
             }
-            ctx.attribute(ATTR_USER, userOpt.get());
+
+            // attach user for handlers
+            ctx.attribute(ATTR_USER, u.get());
         });
     }
 
