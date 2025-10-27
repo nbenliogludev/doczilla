@@ -2,88 +2,13 @@
 <html lang="ru">
 <head>
     <meta charset="utf-8" />
-    <title>Doczilla — загрузка файла</title>
+    <title>Doczilla</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <script type="module">
+        import { isAuthed } from '/js/auth.js';
+        location.replace(isAuthed() ? '/pages/upload.html' : '/pages/login.html');
+    </script>
 </head>
-<body>
-<div class="container">
-    <header class="header">
-        <h1>Doczilla</h1>
-        <p class="muted">Сервис загрузки файла с временной ссылкой на скачивание</p>
-    </header>
-
-    <!-- Регистрация -->
-    <section class="card" id="register-card">
-        <h2>Регистрация</h2>
-        <form id="register-form" autocomplete="off">
-            <label>
-                Имя пользователя
-                <input type="text" id="reg-username" required placeholder="username или email" />
-            </label>
-            <label>
-                Пароль
-                <input type="password" id="reg-password" required placeholder="минимум 6 символов" />
-            </label>
-            <div class="row">
-                <button type="submit">Создать аккаунт</button>
-                <span id="register-status" class="status"></span>
-            </div>
-        </form>
-    </section>
-
-    <!-- Вход -->
-    <section class="card" id="auth-card">
-        <h2>Вход</h2>
-        <form id="login-form" autocomplete="off">
-            <label>
-                Имя пользователя
-                <input type="text" id="username" required placeholder="username или email" />
-            </label>
-            <label>
-                Пароль
-                <input type="password" id="password" required placeholder="пароль" />
-            </label>
-            <div class="row">
-                <button type="submit">Войти</button>
-                <button type="button" id="logout-btn" class="link-btn hidden">Выйти</button>
-                <span id="auth-status" class="status"></span>
-            </div>
-        </form>
-    </section>
-
-    <!-- Загрузка: скрыта до авторизации -->
-    <section class="card" id="upload-card">
-        <h2>Загрузка файла</h2>
-        <form id="upload-form">
-            <label class="file-label">
-                Выберите файл
-                <input type="file" id="file-input" name="file" required />
-            </label>
-            <div class="row">
-                <button type="submit">Загрузить</button>
-                <span id="upload-status" class="status"></span>
-            </div>
-        </form>
-
-        <div id="progress-wrap" class="progress hidden" aria-hidden="true" aria-label="Прогресс загрузки">
-            <div id="progress-bar" class="bar" style="width:0%"></div>
-        </div>
-
-        <div id="result" class="result hidden">
-            <p>Ссылка на скачивание:</p>
-            <div class="row">
-                <a id="download-link" href="#" target="_blank" rel="noopener"></a>
-                <button id="copy-btn" class="link-btn">Скопировать</button>
-            </div>
-        </div>
-    </section>
-
-    <footer class="muted footer">
-        <small>Сначала войдите или зарегистрируйтесь, затем загружайте файлы. Токен хранится локально в браузере.</small>
-    </footer>
-</div>
-
-<script src="/app.js"></script>
-</body>
+<body></body>
 </html>
