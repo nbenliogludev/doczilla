@@ -127,3 +127,86 @@ button.primary:active { transform: translateY(1px); }
     .nav { gap: 6px; }
     button.primary { width: 100%; }
 }
+
+/* =========================
+   Мои ссылки (history list)
+   ========================= */
+
+#history-list{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+}
+
+#history-list .list-item{
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 14px;
+    background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+    box-shadow: 0 6px 16px rgba(0,0,0,.18);
+}
+
+#history-list .list-item .row{
+    justify-content: space-between;
+    gap: 12px;
+}
+
+#history-list .list-item a{
+    color: var(--accent);
+    text-decoration: none;
+    word-break: break-all;
+}
+#history-list .list-item a:hover{
+    text-decoration: underline;
+}
+
+#history-list .list-item .muted{
+    margin-top: 4px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+/* кнопки в карточке истории */
+#history-list .link-btn{
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--line2);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    transition: border-color .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+#history-list .link-btn:hover{
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(96,165,250,.2);
+    filter: brightness(1.06);
+}
+
+/* кнопка «Очистить» */
+#clear-history.link-btn{
+    border: 1px solid var(--line2);
+    background: transparent;
+    padding: 8px 12px;
+    border-radius: 10px;
+}
+
+/* Fix: ensure readable text color on the Clear button */
+#clear-history.link-btn,
+#clear-history.link-btn:visited,
+#clear-history.link-btn:focus{
+    color: var(--text) !important;
+}
+
+#clear-history.link-btn:hover{
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(96,165,250,.2);
+}
+
+/* пустое состояние */
+#history-empty{
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 14px;
+}
