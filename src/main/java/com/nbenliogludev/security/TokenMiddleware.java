@@ -14,9 +14,7 @@ import java.util.Set;
  */
 public class TokenMiddleware {
     public static final String ATTR_USER = "auth.user";
-    private static final Set<String> PUBLIC_ENDPOINTS = Set.of(
-            "/api/login", "/api/register"
-    );
+    private static final Set<String> PUBLIC_POSTS = Set.of("/api/login", "/api/register");
 
     public static void protectApiWithBearer(Javalin app, AuthService auth) {
         app.before(ctx -> {
@@ -27,28 +25,30 @@ public class TokenMiddleware {
 
             if (method == HandlerType.OPTIONS) return;
 
-            if (PUBLIC_ENDPOINTS.contains(path)) return;
+            if (PUBLIC_POSTS.contains(path)) return;
 
-            var tokenOpt = BearerTokenUtil.parseBearer(ctx.header("Authorization"));
-            if (tokenOpt.isEmpty()) {
+            if (path.equals("/api/health")) return;
+
+            String authz = ctx.header("Authorization");
+            if (authz == null || !authz.startsWith("Bearer ")) {
                 unauthorized(ctx, "missing bearer");
                 return;
             }
 
-            Optional<User> user = auth.authenticateToken(tokenOpt.get());
-            if (user.isEmpty()) {
-                unauthorized(ctx, "invalid token");
+            String token = authz.substring(7);
+            Optional<User> u = auth.authenticateToken(token);
+            if (u.isEmpty()) {
+                unauthorized(ctx, "bad token");
                 return;
             }
 
-            ctx.attribute(ATTR_USER, user.get());
+            ctx.attribute(ATTR_USER, u.get());
         });
     }
 
     private static void unauthorized(Context ctx, String why) {
-        ctx.header("WWW-Authenticate", "Bearer");
         ctx.status(401).result("Unauthorized");
-        ctx.skipRemainingHandlers(); // IMPORTANT: stop pipeline in Javalin 6
+        ctx.skipRemainingHandlers();
     }
 
     public static User currentUser(io.javalin.http.Context ctx) {

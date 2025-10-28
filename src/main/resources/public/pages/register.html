@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <title>Doczilla — регистрация</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+<div class="container">
+    <div id="app-header"></div>
+
+    <section class="card">
+        <h2>Регистрация</h2>
+        <form id="register-form" autocomplete="off">
+            <label>Имя пользователя
+                <input type="text" id="reg-username" required placeholder="username или email" />
+            </label>
+            <label>Пароль
+                <input type="password" id="reg-password" required placeholder="минимум 6 символов" />
+            </label>
+            <div class="row">
+                <button type="submit" class="primary">Создать аккаунт</button>
+                <span id="register-status" class="status"></span>
+            </div>
+        </form>
+        <p class="footer">Уже есть аккаунт? <a class="nav-link" href="/pages/login.html">Войдите</a></p>
+    </section>
+</div>
+
+<script type="module">
+    import { redirectIfAuthed, setToken } from '/js/auth.js';
+    import { mountHeader } from '/js/header.js';
+
+    await mountHeader();
+    redirectIfAuthed();
+
+    const form = document.getElementById('register-form');
+    const statusEl = document.getElementById('register-status');
+    const show = (msg, cls='') => { statusEl.textContent = msg; statusEl.className = 'status ' + cls; };
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('reg-username').value.trim();
+        const password = document.getElementById('reg-password').value;
+
+        show('Регистрация...');
+        try {
+            const r = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const json = await r.json().catch(() => ({}));
+            if (!r.ok) throw new Error(json.error || 'Ошибка регистрации');
+
+            setToken(json.token);
+            show('Аккаунт создан. Перенаправление...', 'ok');
+            setTimeout(() => location.href = '/pages/upload.html', 350);
+        } catch (err) {
+            show(err.message || 'Ошибка регистрации', 'err');
+        }
+    });
+</script>
+</body>
+</html>
